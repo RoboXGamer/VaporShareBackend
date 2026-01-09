@@ -13,7 +13,14 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
-    required: false,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ["sender", "reciever"],
+    required: true,
+    lowercase: true,
+    trim: true,
   },
 });
 
