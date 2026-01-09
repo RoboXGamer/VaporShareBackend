@@ -1,6 +1,17 @@
-import { app } from "./app";
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const num: Number = 50;
+dotenv.config();
+const app = express();
 
-console.log({ num });
-console.log(app.name);
+app.use(express.json());
+app.use(cors());
+
+app.get("/", (req, res) => {
+  res.send("Hello, world!");
+});
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
+});
