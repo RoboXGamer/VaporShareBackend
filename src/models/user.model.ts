@@ -11,6 +11,17 @@ const userSchema = new Schema({
     required: true,
     unique: true,
   },
+  password: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ["sender", "reciever"],
+    required: true,
+    lowercase: true,
+    trim: true,
+  },
 });
 
 export const User = model("User", userSchema);
