@@ -1,14 +1,15 @@
 import { app } from "./app";
+import { connectDB } from "./db";
 
-app.get("/", (req, res) => {
-  res.send("World!");
-});
+async function main() {
+  try {
+    await connectDB();
+    app.listen(process.env.PORT, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+    });
+  } catch (error) {
+    console.log("Error connecting to DB", error);
+  }
+}
 
-app.get("/test", (req, res) => {
-  let name = "Prakhar";
-  res.send({ name });
-});
-
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
-});
+main();
