@@ -63,11 +63,9 @@ const userSchema = new Schema<IUserDocument>(
 );
 
 // Mongoose middleware for password hashing
-userSchema.pre("save", async function (next: any) {
-  const user = this as any;
-  if (!user.isModified("password")) return next();
-  user.password = await bcrypt.hash(user.password, 10);
-  next();
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 // Model methods
