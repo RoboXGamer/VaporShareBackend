@@ -13,6 +13,7 @@ export const UserZodSchema = z.object({
 });
 
 export type UserType = z.infer<typeof UserZodSchema>;
+export type UserRole = UserType["type"];
 
 export interface IUserDocument extends UserType, Document {
   isPasswordCorrect(password: string): Promise<boolean>;

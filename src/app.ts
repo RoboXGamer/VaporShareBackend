@@ -6,6 +6,7 @@ import morgan from "morgan";
 import logger from "./utils/logger";
 // Routes Import
 import userRouter from "./routes/user";
+import fileRouter from "./routes/file";
 import { ApiResponse } from "./utils/ApiResponse";
 import { errorHandler } from "./middlewares/error.middleware";
 
@@ -44,6 +45,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/files", fileRouter);
 
 // Error Middleware
 app.use(errorHandler);

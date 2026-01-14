@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import jwt from "jsonwebtoken";
-import { User, IUserDocument } from "../models/user";
+import { User, IUserDocument, UserRole } from "../models/user";
 
 interface JwtPayload {
   _id: string;
@@ -41,3 +41,20 @@ export const verifyJWT: RequestHandler = asyncHandler(
     }
   },
 );
+
+export const checkRole = (allowedRoles: UserRole[]): RequestHandler => {
+  return (req, _res, next) => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+
+    if (!allowedRoles.includes(req.user.type)) {
+      throw new ApiError(
+        403,
+        "You do not have permission to perform this action",
+      );
+    }
+
+    next();
+  };
+};
