@@ -3,20 +3,17 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt, { Secret } from "jsonwebtoken";
 
-// Define the schema with Zod for inference and validation
 export const UserZodSchema = z.object({
   username: z.string().min(3).toLowerCase().trim(),
-  email: z.string().email().toLowerCase().trim(),
+  email: z.email().toLowerCase().trim(),
   password: z.string().min(6),
   fullName: z.string().min(1).trim(),
   refreshToken: z.string().optional(),
   type: z.enum(["sender", "receiver"]),
 });
 
-// Infer TypeScript type from Zod schema
 export type UserType = z.infer<typeof UserZodSchema>;
 
-// Define the Document interface for Mongoose
 export interface IUserDocument extends UserType, Document {
   isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;

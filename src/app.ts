@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import logger from "./utils/logger";
-//routes import
+// Routes Import
 import userRouter from "./routes/user";
 import { ApiResponse } from "./utils/ApiResponse";
 import { errorHandler } from "./middlewares/error.middleware";
