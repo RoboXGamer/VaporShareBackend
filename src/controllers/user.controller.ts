@@ -12,7 +12,7 @@ const registerUser: Function = asyncHandler(async (req, res) => {
     throw new apiError(400, "fill all detail");
   }
   // check if already present in db: username
-  const existingUser = await User.findOne({ $or: [username, email] });
+  const existingUser = await User.findOne({ $or: [{ username }, { email }] });
   if (existingUser) {
     throw new apiError(409, "User already exists");
   }
@@ -25,10 +25,11 @@ const registerUser: Function = asyncHandler(async (req, res) => {
   if (!createdUser) {
     throw new apiError(500, "User creation failed");
   }
-  
-  // send success message
-  res.status(201).json(new apiResponse(200, createdUser, "User created successfully"))
 
+  // send success message
+  res
+    .status(201)
+    .json(new apiResponse(200, createdUser, "User created successfully"));
 });
 
 export { registerUser };
