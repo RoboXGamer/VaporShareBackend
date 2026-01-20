@@ -9,11 +9,6 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-    },
     password: {
       type: String,
       required: true,
@@ -23,6 +18,9 @@ const userSchema = new mongoose.Schema(
       enum: ["sender", "receiver"],
       required: true,
     },
+    refreshToken:{
+      type: String,
+    }
   },
   { timestamps: true },
 );
@@ -39,7 +37,7 @@ userSchema.methods.isPasswordCorrect = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.genrateAccessToken = function () {
+userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
@@ -51,7 +49,7 @@ userSchema.methods.genrateAccessToken = function () {
     },
   );
 };
-userSchema.methods.genrateRefreshToken = function () {
+userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
       _id: this._id,
