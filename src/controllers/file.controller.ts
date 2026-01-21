@@ -1,4 +1,5 @@
 import { File } from "@/model/file.model";
+import { User } from "@/model/user.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
 import { asyncHandler } from "@/utils/asyncHandler";
@@ -6,10 +7,10 @@ import crypto from "crypto";
 
 const fileUpload = asyncHandler(async (req, res) => {
   // @ts-ignore
-  if(req.user.type == "receiver"){
-    throw new apiError(403, "User not a sender")
+  if (req.user.type != "sender") {
+    throw new apiError(403, "User not allow to upload");
   }
-  
+
   const { name, description, category } = req.body;
 
   // file name, category, expiry date must not be empty
@@ -44,7 +45,56 @@ const fileUpload = asyncHandler(async (req, res) => {
   }
   res
     .status(201)
-    .json(new apiResponse(200, createdFile, "File created successfully"));
+    .json(new apiResponse(200, {createdFile, key}, "File created successfully"));
 });
 
-export { fileUpload };
+const fileReceive = asyncHandler(async (req, res) => {
+  const { key } = req.body;
+  // type check
+  // @ts-ignore
+  if (req.user.type != "receiver") {
+    throw new apiError(403, "User not receive file");
+  }
+
+  // chech for file with provided key
+  const hashedKey = crypto.createHash("sha256").update(key).digest("hex");
+
+  const file = await File.findOne({ key: hashedKey }).select(
+    "-key -createdAt -updatedAt",
+  );
+  if (!file) {
+    throw new apiError(404, "File not found");
+  }
+
+  // check if file have expired
+  const date = new Date(Date.now())
+  if(file.expiryDate <= date){
+    await File.findOneAndDelete({ key: hashedKey })
+    throw new apiError(410, "File have been expired")
+  }
+
+  // get data of sender
+  const sender = await User.findById(file.userId).select(
+    "-password -refreshToken",
+  );
+  if (!sender) {
+    throw new apiError(500, "Failed to retrieve sender's data");
+  }
+
+  // file data with sender detail send to frontend
+  res.status(200).json(
+    new apiResponse(
+      200,
+      {
+        "file name": file.name,
+        description: file.description,
+        category: file.category,
+        expiryDate: file.expiryDate,
+        sender: sender.username,
+      },
+      "File retrieve successfully",
+    ),
+  );
+});
+
+export { fileUpload, fileReceive };

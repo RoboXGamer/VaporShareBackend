@@ -2,13 +2,12 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { User } from "@/model/user.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
-import { ObjectId } from "mongoose";
 
-const generateAccessAndRefreshTokens = async function (userId:string) {
+const generateAccessAndRefreshTokens = async function (userId: string) {
   try {
     const user = await User.findById(userId);
-    if(!user){
-      throw new apiError(404, "User not found")
+    if (!user) {
+      throw new apiError(404, "User not found");
     }
     //@ts-ignore
     const accessToken = user.generateAccessToken();
@@ -84,7 +83,9 @@ const loginUser = asyncHandler(async (req, res) => {
     String(user._id),
   );
 
-  const loggedInUser = await User.findOne(user._id).select("-password -refreshToken");
+  const loggedInUser = await User.findOne(user._id).select(
+    "-password -refreshToken",
+  );
 
   // send cookies
   const options = {
@@ -121,15 +122,14 @@ const logoutUser = asyncHandler(async (req, res) => {
   // remove cookies
   const options = {
     httpOnly: true,
-    secure: true
-  }
+    secure: true,
+  };
 
   return res
-  .status(200)
-  .clearCookie("accessToken", options)
-  .clearCookie("refreshToken", options)
-  .json(new apiResponse(200, {}, "User logged out"))
-
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new apiResponse(200, {}, "User logged out"));
 });
 
 export { registerUser, loginUser, logoutUser };
