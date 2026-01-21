@@ -2,11 +2,17 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { User } from "@/model/user.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
+import { ObjectId } from "mongoose";
 
-const generateAccessAndRefreshTokens = async function (userId) {
+const generateAccessAndRefreshTokens = async function (userId:string) {
   try {
     const user = await User.findById(userId);
+    if(!user){
+      throw new apiError(404, "User not found")
+    }
+    //@ts-ignore
     const accessToken = user.generateAccessToken();
+    //@ts-ignore
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
@@ -21,7 +27,7 @@ const generateAccessAndRefreshTokens = async function (userId) {
   }
 };
 
-const registerUser: Function = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   // get data from body
   const { username, password, type } = req.body;
 
@@ -52,7 +58,7 @@ const registerUser: Function = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, createdUser, "User created successfully"));
 });
 
-const loginUser: Function = asyncHandler(async (req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
   // req.body data retreival
   const { username, password } = req.body;
 
@@ -68,16 +74,17 @@ const loginUser: Function = asyncHandler(async (req, res) => {
   }
 
   // password check
-  if (await user.isPasswordCorrect(password)) {
+  // @ts-ignore
+  if (!(await user.isPasswordCorrect(password))) {
     throw new apiError(401, "Password is incorrect");
   }
 
   // generate tokens
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id,
+    String(user._id),
   );
 
-  const loggedInUser = User.findOne(user._id).select("-password -refreshToken");
+  const loggedInUser = await User.findOne(user._id).select("-password -refreshToken");
 
   // send cookies
   const options = {
@@ -102,9 +109,10 @@ const loginUser: Function = asyncHandler(async (req, res) => {
     );
 });
 
-const logoutUser: Function = asyncHandler(async (req, res) => {
+const logoutUser = asyncHandler(async (req, res) => {
   // remove refresh token
   await User.findByIdAndUpdate(
+    // @ts-ignore
     req.user._id,
     { $set: { refreshToken: undefined } },
     { new: true },
