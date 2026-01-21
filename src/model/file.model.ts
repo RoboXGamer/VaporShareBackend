@@ -16,7 +16,6 @@ const fileSchema = new mongoose.Schema(
     key: {
       type: String,
       unique: true,
-      required: true,
     },
     expiryDate: {
       type: Date,

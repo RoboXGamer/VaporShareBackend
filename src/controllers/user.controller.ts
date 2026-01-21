@@ -66,7 +66,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new apiError(400, "Username or password not found");
   }
 
-  // username or email check
+  // username check
   const user = await User.findOne({ username });
 
   if (!user) {
