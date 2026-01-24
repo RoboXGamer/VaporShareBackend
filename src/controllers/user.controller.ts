@@ -3,6 +3,8 @@ import { User } from "@/model/user.model";
 import { apiError } from "@/utils/apiError";
 import { apiResponse } from "@/utils/apiResponse";
 
+const allowedTypes = ["sender", "receiver"];
+
 const generateAccessAndRefreshTokens = async function (userId: string) {
   try {
     const user = await User.findById(userId);
@@ -31,9 +33,16 @@ const registerUser = asyncHandler(async (req, res) => {
   const { username, password, type } = req.body;
 
   // valdiation - no empty submition
-  if ([username, password, type].some((e) => e?.trim() == "")) {
+  if ([username, password, type].some((e) => !e || e.trim() == "")) {
     throw new apiError(400, "fill all detail");
   }
+
+  const normalizedType = type.trim().toLowerCase();
+
+  if (!allowedTypes.includes(normalizedType)) {
+    throw new apiError(400, "Type not allowed");
+  }
+
   // check if already present in db: username
   const existingUser = await User.findOne({ username });
   if (existingUser) {
@@ -41,7 +50,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // if not then create user in db {create an obj}
-  const user = await User.create({ username, password, type });
+  const user = await User.create({ username, password, type: normalizedType });
 
   // check for successful creation and remove password from response from db
   const createdUser = await User.findById(user._id).select(
