@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -15,6 +17,16 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+// @ts-ignore
+function errorHandler(err, req, res, next){
+  res.status(err.statusCode).json({
+    statusCode: err.statusCode,
+    message: err.message,
+    success: err.success,
+    errors: err.errors
+})
+}
+
 // routes
 
 import userRouter from "./routes/user.routes";
@@ -22,5 +34,7 @@ import fileRouter from "./routes/file.routes";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/file", fileRouter);
+
+app.use(errorHandler)
 
 export { app };
