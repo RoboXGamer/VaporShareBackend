@@ -10,6 +10,9 @@ export const UserZodSchema = z.object({
   fullName: z.string().min(1).trim(),
   refreshToken: z.string().optional(),
   type: z.enum(["sender", "receiver"]),
+  currentStorageUsed: z.number().default(0),
+  forgotPasswordToken: z.string().optional(),
+  forgotPasswordTokenExpiry: z.date().optional(),
 });
 
 export type UserType = z.infer<typeof UserZodSchema>;
@@ -58,6 +61,12 @@ const userSchema = new Schema<IUserDocument>(
       lowercase: true,
       trim: true,
     },
+    currentStorageUsed: {
+      type: Number,
+      default: 0,
+    },
+    forgotPasswordToken: String,
+    forgotPasswordTokenExpiry: Date,
   },
   { timestamps: true },
 );
